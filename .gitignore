@@ -1,0 +1,13 @@
+# Backups créés par install-dotfiles
+*.bak
+
+# Config propre à une machine, volontairement non versionnée
+.bashrc.local
+.profile.local
+
+# Plugins vim : clonés par install-dotfiles, pas archivés ici
+.vim/pack/
+
+# Divers
+*.swp
+.viminfo
