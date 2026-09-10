@@ -44,7 +44,7 @@ else
 fi
 alias l="ls -CF"
 
-alias vi="vim"
+alias vi="nvim"                 # "vim" pour revenir à vim
 alias g="git"
 alias rg="rg --hidden"
 command -v fd >/dev/null && alias fd="fd -HI"
