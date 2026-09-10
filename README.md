@@ -153,8 +153,9 @@ fourni par fzf.vim.
 Config en un seul fichier, reprise de la vidéo
 [« La config Neovim PARFAITE en partant de ZÉRO »](https://www.youtube.com/watch?v=-zSpBsiTy20)
 (Loïc Rust — [config d'origine](https://github.com/darikoko/neovim-config)).
-Requiert Neovim ≥ 0.12. Ajouts à la config d'origine : friendly-snippets et les
-serveurs basedpyright (Python), jdtls (Java) et bashls (bash).
+Requiert Neovim ≥ 0.12. Ajouts à la config d'origine : friendly-snippets, les
+serveurs basedpyright (Python), jdtls (Java) et bashls (bash), et
+render-markdown avec son aperçu dans un onglet.
 
 L'alias `vi` de `.bashrc` lance `nvim` ; le repasser à `"vim"` pour revenir à
 vim. `vim` lui-même et `EDITOR` (`.profile`) restent sur vim.
@@ -176,6 +177,7 @@ versionné. Une machine neuve installe exactement les mêmes commits.
 | blink.cmp (+ blink.lib) | Autocomplétion : LSP, chemins, snippets, mots du buffer. |
 | friendly-snippets | Snippets par langage (Java, C/C++, Python, Rust, JS/TS…), proposés par blink.cmp. |
 | leap.nvim | Sauts à l'écran en deux caractères. |
+| render-markdown.nvim | Met en forme le Markdown dans Neovim (titres, listes, tableaux, code) ; aperçu dans un onglet avec `Espace mp`. |
 
 ### Raccourcis
 
@@ -186,8 +188,11 @@ réglages de l'alias `rg` et du `:Rg` de vim : fichiers cachés inclus,
 | Touche | Effet |
 | --- | --- |
 | `Espace ff` / `fg` / `fb` | fichiers par nom / recherche ripgrep dans le contenu / buffers ouverts |
+| `Ctrl-T` dans un picker | ouvre le fichier choisi dans un nouvel onglet |
+| `gt` / `gT` | onglet suivant / précédent (`:tabclose` ferme l'onglet courant) |
+| `Espace mp` (Markdown) | aperçu mis en forme dans un nouvel onglet, synchronisé avec le fichier ; relancé depuis le fichier ou l'aperçu, le ferme |
 | `:grep motif` | recherche ripgrep, résultats dans la quickfix list (`:copen`, `:cnext`) |
-| `Espace fe` | explorateur (`a` créer — finir par `/` pour un dossier, `r` renommer, `d` supprimer) |
+| `Espace fe` | explorateur, fichiers cachés visibles et `.git` exclu (`a` créer — finir par `/` pour un dossier, `r` renommer, `d` supprimer, `H` masquer/afficher les fichiers cachés, `I` ceux ignorés par git) |
 | `Espace fd` | diagnostics |
 | `Espace fs` / `fS` | symboles LSP du buffer / du projet |
 | `Espace fm` | formater le buffer (LSP) |
@@ -286,7 +291,7 @@ secrets, réglages d'une seule machine.
 - `gr` (références) est aussi le préfixe des raccourcis LSP par défaut de
   Neovim (`grn`, `gra`, `grr`…) : Neovim attend `timeoutlen` (1 s) avant de le
   déclencher. Repris tel quel de la config d'origine.
-- Les icônes (lualine, diagnostics, pickers) sont des glyphes Nerd Font : sans
+- Les icônes (lualine, diagnostics, pickers, titres Markdown) sont des glyphes Nerd Font : sans
   police Nerd Font dans le terminal Windows, elles s'affichent en carrés.
 - Recharger la config avec `:source` affiche un avertissement « already setup »
   de snacks.nvim, sans conséquence. Plusieurs plugins demandent de toute façon

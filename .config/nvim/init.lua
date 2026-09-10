@@ -4,7 +4,8 @@
 -- (Loïc Rust) : https://www.youtube.com/watch?v=-zSpBsiTy20
 -- Config d'origine : https://github.com/darikoko/neovim-config
 -- Ajouts : friendly-snippets, serveurs basedpyright (Python), jdtls (Java) et
--- bashls (bash), recherches ripgrep alignées sur l'alias rg du shell.
+-- bashls (bash), recherches ripgrep alignées sur l'alias rg du shell,
+-- render-markdown avec aperçu dans un onglet.
 --
 -- Plugins gérés par vim.pack, le gestionnaire intégré à Neovim 0.12 : clonés
 -- au premier lancement dans ~/.local/share/nvim/site/pack/core/opt/, révisions
@@ -24,6 +25,7 @@ vim.pack.add({
     'https://github.com/saghen/blink.cmp',                    -- autocomplétion
     'https://github.com/rafamadriz/friendly-snippets',        -- snippets, lus par blink.cmp
     'https://codeberg.org/andyg/leap.nvim',                   -- sauts à 2 caractères
+    'https://github.com/MeanderingProgrammer/render-markdown.nvim', -- rendu Markdown
 })
 
 -- ── Options de base ─────────────────────────────────────────────────────
@@ -62,9 +64,15 @@ require('nvim-autopairs').setup({})
 require('snacks').setup({
     picker = {
         enabled = true,
-        -- Espace fg lance déjà ripgrep (.git exclu) : on y ajoute les fichiers
-        -- cachés, comme :grep et le :Rg de vim.
-        sources = { grep = { hidden = true } },
+        sources = {
+            -- Espace fg lance déjà ripgrep (.git exclu) : on y ajoute les
+            -- fichiers cachés, comme :grep et le :Rg de vim.
+            grep = { hidden = true },
+            -- Espace fe : fichiers cachés visibles d'office, .git exclu comme
+            -- partout ailleurs. Dans l'explorateur, H masque/affiche les
+            -- fichiers cachés, I les fichiers ignorés par git.
+            explorer = { hidden = true, exclude = { '.git' } },
+        },
     },
     explorer = { enabled = true },
     lazygit = { enabled = true }, -- nécessite le binaire lazygit
@@ -77,6 +85,10 @@ require('tiny-inline-diagnostic').setup({
     -- modern, classic, minimal, powerline, ghost, simple, nonerdfont, amongus
     preset = 'ghost',
 })
+
+-- render-markdown s'initialise seul au chargement (réglages par défaut) : pas de
+-- setup() ici, qui serait rappelé derrière. Pour le régler :
+-- vim.g.render_markdown_config = { ... }
 
 -- blink.cmp compile sa lib Rust (cargo build --release) au premier lancement,
 -- puis réutilise le binaire déjà construit.
@@ -134,3 +146,35 @@ map('n', '<leader>lg', function() Snacks.lazygit() end, { desc = 'LazyGit' })
 
 map({ 'n', 'x', 'o' }, 's', '<Plug>(leap)', { desc = 'Leap : fenêtre courante' })
 map('n', 'S', '<Plug>(leap-from-window)', { desc = 'Leap : autres fenêtres' })
+
+-- ── Markdown : aperçu dans un onglet ────────────────────────────────────
+-- Espace mp ouvre l'aperçu render-markdown dans un nouvel onglet, synchronisé
+-- avec le fichier (gt / gT pour passer de l'un à l'autre) ; relancé depuis le
+-- fichier ou depuis l'aperçu, il le ferme. preview.open() place l'aperçu à
+-- droite de la fenêtre courante : on lui fournit une fenêtre provisoire dans le
+-- nouvel onglet, refermée aussitôt. La source, elle, est retrouvée dans son
+-- onglet (win_findbuf), la synchronisation continue donc entre les deux.
+local function markdown_preview()
+    local preview = require('render-markdown.core.preview')
+    local buf = vim.api.nvim_get_current_buf()
+    if preview.get(buf) then -- on est dans l'aperçu
+        return vim.api.nvim_buf_delete(buf, {})
+    end
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+        if preview.get(b) == buf then -- aperçu déjà ouvert pour ce fichier
+            return vim.api.nvim_buf_delete(b, {})
+        end
+    end
+    vim.cmd.tabnew()
+    local placeholder = vim.api.nvim_get_current_win()
+    vim.bo.bufhidden = 'wipe'
+    preview.open(buf)
+    vim.api.nvim_win_close(placeholder, true)
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'markdown',
+    callback = function(ev)
+        map('n', '<leader>mp', markdown_preview, { buffer = ev.buf, desc = 'Aperçu Markdown (onglet)' })
+    end,
+})
